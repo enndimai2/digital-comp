@@ -160,7 +160,17 @@ def index():
             if filtered:
                 movie_data = random.choice(filtered)
             else:
-                movie_data = random.choice(movies[genre])
+                movie_data = {
+                    'title': 'No recommendation',
+                    'poster': '',
+                    'trailer': '',
+                    'description': f'Sorry, no recommendations for {genre.title()} in the selected language.',
+                    'summary': '',
+                    'cast': '',
+                    'rating': '',
+                    'imdb': 'https://www.imdb.com/?ref_=tt_nv_home',
+                    'language': language
+                }
         else:
             movie_data = {
                 'title': 'No recommendation',
@@ -170,7 +180,8 @@ def index():
                 'summary': '',
                 'cast': '',
                 'rating': '',
-                'imdb': 'https://www.imdb.com/?ref_=tt_nv_home'
+                'imdb': 'https://www.imdb.com/?ref_=tt_nv_home',
+                'language': language
             }
     return render_template('index.html', movie=movie_data)
 
