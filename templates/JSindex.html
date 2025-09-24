@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Movie Recommender</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #222; color: #fff; }
+    .container { max-width: 400px; margin: 40px auto; background: #333; border-radius: 10px; padding: 24px; }
+    label, select, button { display: block; margin: 12px 0; }
+    .movie-box { margin-top: 24px; background: #181818; border-radius: 10px; padding: 16px; }
+    .movie-title { font-size: 1.2em; font-weight: bold; margin-bottom: 8px; }
+    .movie-desc { margin-bottom: 8px; }
+    .movie-links a { color: #4ecdc4; margin-right: 10px; }
+    iframe { margin-top: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Movie Recommender</h2>
+    <label for="genre">Genre:</label>
+    <select id="genre">
+      <option value="">--Select Genre--</option>
+      <option value="action">Action</option>
+      <option value="comedy">Comedy</option>
+      <option value="anime">Anime</option>
+    </select>
+    <label for="language">Language:</label>
+    <select id="language">
+      <option value="">--Select Language--</option>
+      <option value="en">English</option>
+      <option value="zh">Chinese</option>
+      <option value="ja">Japanese</option>
+    </select>
+    <button onclick="recommendMovie()">Recommend</button>
+    <div id="result"></div>
+  </div>
+  <script>
+    const movies = {
+      action: [
+        {
+          title: "Mad Max: Fury Road",
+          language: "en",
+          description: "A high-octane action film set in a desert wasteland.",
+          imdb: "https://www.imdb.com/title/tt1392190/",
+          youtube: "https://www.youtube.com/embed/hEJnMQG9ev8"
+        },
+        {
+          title: "Wolf Warrior 2",
+          language: "zh",
+          description: "A Chinese action film featuring a heroic soldier.",
+          imdb: "https://www.imdb.com/title/tt7131870/",
+          youtube: "https://www.youtube.com/embed/8PLifPUIuic"
+        }
+      ],
+      comedy: [
+        {
+          title: "The Grand Budapest Hotel",
+          language: "en",
+          description: "A whimsical tale of a legendary concierge at a famous hotel.",
+          imdb: "https://www.imdb.com/title/tt2278388/",
+          youtube: "https://www.youtube.com/embed/1Fg5iWmQjwk"
+        },
+        {
+          title: "Lost in Thailand",
+          language: "zh",
+          description: "A fun adventure of three men in Thailand.",
+          imdb: "https://www.imdb.com/title/tt2217859/",
+          youtube: "https://www.youtube.com/embed/8pQeQ8bG5oU"
+        }
+      ],
+      anime: [
+        {
+          title: "Spirited Away",
+          language: "ja",
+          description: "A magical adventure in a world of spirits.",
+          imdb: "https://www.imdb.com/title/tt0245429/",
+          youtube: "https://www.youtube.com/embed/ByXuk9QqQkk"
+        },
+        {
+          title: "Your Name",
+          language: "ja",
+          description: "A touching story about two teenagers who swap bodies.",
+          imdb: "https://www.imdb.com/title/tt5311514/",
+          youtube: "https://www.youtube.com/embed/3KR8_igDs1Y"
+        }
+      ]
+    };
+
+    function recommendMovie() {
+      const genre = document.getElementById('genre').value;
+      const language = document.getElementById('language').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '';
+
+      if (!genre || !language) {
+        resultDiv.innerHTML = '<div>Please select both genre and language.</div>';
+        return;
+      }
+
+      const filtered = movies[genre].filter(m => m.language === language);
+      if (filtered.length === 0) {
+        resultDiv.innerHTML = '<div>No movie found for that genre and language.</div>';
+        return;
+      }
+      const movie = filtered[Math.floor(Math.random() * filtered.length)];
+      resultDiv.innerHTML = `
+        <div class="movie-box">
+          <div class="movie-title">${movie.title}</div>
+          <div class="movie-desc">${movie.description}</div>
+          <div class="movie-links">
+            <a href="${movie.imdb}" target="_blank">IMDb</a>
+          </div>
+          <iframe width="320" height="180" src="${movie.youtube}" allowfullscreen></iframe>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
