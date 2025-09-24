@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation</title>
+    <style>
+        body {
+            background: #141414;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+            padding: 30px 30px 20px 30px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            letter-spacing: 2px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        select, button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 1em;
+        }
+        button {
+            background: #e50914;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #b0060f;
+        }
+        .movie-box {
+            margin-top: 30px;
+            background: #181818;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .movie-poster {
+            width: 180px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        .movie-title {
+            margin: 18px 0 8px 0;
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+        }
+        .movie-description {
+            font-size: 1em;
+            color: #ccc;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .movie-rating {
+            margin-bottom: 10px;
+        }
+        .stars {
+            color: #FFD700;
+            font-size: 1.2em;
+        }
+        .imdb-link {
+            color: #e50914;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .imdb-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Movie Recommendation</h1>
+        <form method="POST">
+            <label for="genre">Choose a genre:</label>
+            <select name="genre" id="genre" required>
+                <option value="">--Select Genre--</option>
+                <option value="action">Action</option>
+                <option value="sci-fi">Sci-Fi</option>
+                <option value="drama">Drama</option>
+                <option value="comedy">Comedy</option>
+                <option value="anime">Anime</option>
+                <option value="tvshow">TV Show</option>
+            </select>
+            <label for="language">Language:</label>
+            <select name="language" id="language" required>
+                <option value="">--Select Language--</option>
+                <option value="en">English</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="zh">Chinese</option>
+                <option value="other">Other</option>
+            </select>
+            <button type="submit">Get Recommendation</button>
+        </form>
+        {% if movie %}
+        <div class="movie-box">
+            {% if movie.trailer %}
+            <div style="width:100%;display:flex;justify-content:center;margin-bottom:16px;">
+                <iframe width="320" height="180" src="{{ movie.trailer }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            {% endif %}
+            <div class="movie-title">{{ movie.title }}</div>
+            <div class="movie-description">{{ movie.description }}</div>
+            {% if movie.summary %}
+            <div class="movie-description"><b>Summary:</b> {{ movie.summary }}</div>
+            {% endif %}
+            {% if movie.cast %}
+            <div class="movie-description"><b>Cast:</b> {{ movie.cast }}</div>
+            {% endif %}
+            {% if movie.rating %}
+            <div class="movie-rating">
+                <span class="stars">
+                    {% for i in range(1, 6) %}
+                        {% if movie.rating >= i * 2 %}
+                            &#9733;
+                        {% elif movie.rating >= (i * 2) - 1 %}
+                            &#9733;
+                        {% else %}
+                            &#9734;
+                        {% endif %}
+                    {% endfor %}
+                </span>
+                <span>({{ movie.rating }}/10)</span>
+            </div>
+            {% endif %}
+            {% if movie.imdb %}
+            <a href="{{ movie.imdb }}" class="imdb-link" target="_blank" style="margin-top:10px;display:inline-block;padding:8px 18px;background:#e50914;color:#fff;border-radius:5px;font-weight:bold;text-decoration:none;">View More</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
