@@ -4,14 +4,106 @@
   <meta charset="UTF-8">
   <title>Movie Recommender</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #222; color: #fff; }
-    .container { max-width: 400px; margin: 40px auto; background: #333; border-radius: 10px; padding: 24px; }
-    label, select, button { display: block; margin: 12px 0; }
-    .movie-box { margin-top: 24px; background: #181818; border-radius: 10px; padding: 16px; }
-    .movie-title { font-size: 1.2em; font-weight: bold; margin-bottom: 8px; }
-    .movie-desc { margin-bottom: 8px; }
-    .movie-links a { color: #4ecdc4; margin-right: 10px; }
-    iframe { margin-top: 10px; border-radius: 8px; }
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', Arial, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      min-width: 1920px;
+      min-height: 1080px;
+      overflow-x: auto;
+    }
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #23272a;
+      border-radius: 16px;
+      padding: 40px 48px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+      border: 1px solid #2d2d2d;
+    }
+    h2 {
+      font-size: 2.2em;
+      font-weight: 700;
+      margin-bottom: 24px;
+      letter-spacing: -1px;
+    }
+    label, select, button {
+      display: block;
+      margin: 18px 0 8px 0;
+      font-size: 1.1em;
+    }
+    select, button {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #181818;
+      color: #fff;
+      font-size: 1em;
+      margin-bottom: 18px;
+    }
+    button {
+      background: #4ecdc4;
+      color: #181818;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #38b2ac;
+    }
+    .movie-box {
+      margin-top: 32px;
+      background: #181818;
+      border-radius: 12px;
+      padding: 28px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+      border: 1px solid #2d2d2d;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .movie-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #4ecdc4;
+    }
+    .movie-summary {
+      font-size: 1.1em;
+      color: #e0e0e0;
+      margin-bottom: 8px;
+    }
+    .movie-casting {
+      font-size: 1em;
+      color: #bdbdbd;
+      margin-bottom: 8px;
+    }
+    .movie-links a {
+      color: #4ecdc4;
+      margin-right: 18px;
+      text-decoration: underline;
+      font-weight: 500;
+    }
+    iframe {
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+      width: 480px;
+      height: 270px;
+      max-width: 100%;
+      background: #000;
+      align-self: center;
+    }
+    @media (max-width: 900px) {
+      .container { max-width: 98vw; padding: 16px; }
+      iframe { width: 100%; height: 180px; }
+    }
   </style>
 </head>
 <body>
@@ -21,8 +113,11 @@
     <select id="genre">
       <option value="">--Select Genre--</option>
       <option value="action">Action</option>
+  <option value="sciFi">Sci-Fi</option>
+      <option value="drama">Drama</option>
       <option value="comedy">Comedy</option>
       <option value="anime">Anime</option>
+      <option value="tvshow">TV Show</option>
     </select>
     <label for="language">Language:</label>
     <select id="language">
@@ -30,6 +125,9 @@
       <option value="en">English</option>
       <option value="zh">Chinese</option>
       <option value="ja">Japanese</option>
+      <option value="es">Spanish</option>
+      <option value="ms">Bahasa Melayu</option>
+      <option value="ko">Korean</option>
     </select>
     <button onclick="recommendMovie()">Recommend</button>
     <div id="result"></div>
@@ -38,50 +136,191 @@
     const movies = {
       action: [
         {
-          title: "Mad Max: Fury Road",
-          language: "en",
-          description: "A high-octane action film set in a desert wasteland.",
-          imdb: "https://www.imdb.com/title/tt1392190/",
-          youtube: "https://www.youtube.com/embed/hEJnMQG9ev8"
+          title: 'Mad Max: Fury Road',
+          poster: 'https://image.tmdb.org/t/p/w500/8tZYtuWezp8JbcsvHYO0O46tFbo.jpg',
+          trailer: 'https://www.youtube.com/embed/hEJnMQG9ev8',
+          description: 'In a post-apocalyptic wasteland, Max teams up with Furiosa to escape a tyrant and his army.',
+          summary: 'A visually stunning, high-octane action film set in a desert wasteland where survival is a daily struggle.',
+          cast: 'Tom Hardy, Charlize Theron, Nicholas Hoult',
+          rating: 8.1,
+          imdb: 'https://www.imdb.com/title/tt1392190/',
+          language: 'en'
         },
         {
-          title: "Wolf Warrior 2",
-          language: "zh",
-          description: "A Chinese action film featuring a heroic soldier.",
-          imdb: "https://www.imdb.com/title/tt7131870/",
-          youtube: "https://www.youtube.com/embed/8PLifPUIuic"
+          title: 'John Wick',
+          poster: 'https://image.tmdb.org/t/p/w500/5vHssUeVe25bMrof1HyaPyWgaP.jpg',
+          trailer: 'https://www.youtube.com/embed/2AUmvWm5ZDQ',
+          description: 'An ex-hitman comes out of retirement to track down the gangsters that killed his dog.',
+          summary: 'Stylish, relentless action with Keanu Reeves as a legendary assassin.',
+          cast: 'Keanu Reeves, Michael Nyqvist, Alfie Allen',
+          rating: 7.4,
+          imdb: 'https://www.imdb.com/title/tt2911666/',
+          language: 'en'
+        },
+        {
+          title: 'Wolf Warrior 2',
+          poster: 'https://image.tmdb.org/t/p/w500/7G99Rj6UjG3aQn6cL5lL2lQe6Qm.jpg',
+          trailer: 'https://www.youtube.com/embed/8PLifPUIuic',
+          description: 'A Chinese special forces operative ventures into Africa to save civilians from local warlords.',
+          summary: 'A Chinese action blockbuster with international flair.',
+          cast: 'Wu Jing, Frank Grillo, Celina Jade',
+          rating: 6.2,
+          imdb: 'https://www.imdb.com/title/tt7131870/',
+          language: 'zh'
+        },
+        {
+          title: 'Train to Busan',
+          poster: 'https://image.tmdb.org/t/p/w500/rzRQnG6i8g8kzHkAmlM2F8h5F63.jpg',
+          trailer: 'https://www.youtube.com/embed/pyWuHv2-Abk',
+          description: 'Passengers struggle to survive on a train during a sudden zombie outbreak in South Korea.',
+          summary: 'A thrilling Korean zombie action film.',
+          cast: 'Gong Yoo, Ma Dong-seok, Jung Yu-mi',
+          rating: 7.6,
+          imdb: 'https://www.imdb.com/title/tt5700672/',
+          language: 'ko'
+        }
+      ],
+  // --- FIX: Add comma to separate action and sci-fi ---
+  sciFi: [
+        {
+          title: 'The Matrix',
+          poster: 'https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
+          trailer: 'https://www.youtube.com/embed/vKQi3bBA1y8',
+          description: 'A computer hacker learns about the true nature of his reality and his role in the war against its controllers.',
+          summary: 'A mind-bending sci-fi classic that questions reality and explores the power of human choice.',
+          cast: 'Keanu Reeves, Laurence Fishburne, Carrie-Anne Moss',
+          rating: 8.7,
+          imdb: 'https://www.imdb.com/title/tt0133093/',
+          language: 'en'
+        },
+        {
+          title: 'Inception',
+          poster: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
+          trailer: 'https://www.youtube.com/embed/YoHD9XEInc0',
+          description: 'A thief who steals corporate secrets through dream-sharing technology is given an impossible task.',
+          summary: 'Dreams within dreams in a visually stunning thriller.',
+          cast: 'Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page',
+          rating: 8.8,
+          imdb: 'https://www.imdb.com/title/tt1375666/',
+          language: 'en'
+        }
+      ],
+      drama: [
+        {
+          title: 'The Social Network',
+          poster: 'https://image.tmdb.org/t/p/w500/n0ybibhJtQ5icDqTp8eRytcIHJx.jpg',
+          trailer: 'https://www.youtube.com/embed/lB95KLmpLR4',
+          description: 'The story of the founding of Facebook and the lawsuits that followed.',
+          summary: 'A gripping drama about ambition, friendship, and betrayal in the digital age.',
+          cast: 'Jesse Eisenberg, Andrew Garfield, Justin Timberlake',
+          rating: 7.7,
+          imdb: 'https://www.imdb.com/title/tt1285016/',
+          language: 'en'
+        },
+        {
+          title: 'Forrest Gump',
+          poster: 'https://image.tmdb.org/t/p/w500/saHP97rTPS5eLmrLQEcANmKrsFl.jpg',
+          trailer: 'https://www.youtube.com/embed/bLvqoHBptjg',
+          description: 'The presidencies of Kennedy and Johnson, the Vietnam War, and more through the eyes of Forrest Gump.',
+          summary: 'A heartwarming story of an extraordinary man in ordinary times.',
+          cast: 'Tom Hanks, Robin Wright, Gary Sinise',
+          rating: 8.8,
+          imdb: 'https://www.imdb.com/title/tt0109830/',
+          language: 'en'
         }
       ],
       comedy: [
         {
-          title: "The Grand Budapest Hotel",
-          language: "en",
-          description: "A whimsical tale of a legendary concierge at a famous hotel.",
-          imdb: "https://www.imdb.com/title/tt2278388/",
-          youtube: "https://www.youtube.com/embed/1Fg5iWmQjwk"
+          title: 'The Grand Budapest Hotel',
+          poster: 'https://image.tmdb.org/t/p/w500/nX5XotM9yprCKarRH4fzOq1VM1J.jpg',
+          trailer: 'https://www.youtube.com/embed/1Fg5iWmQjwk',
+          description: 'A whimsical tale of a legendary concierge at a famous hotel and his adventures.',
+          summary: 'A colorful and quirky comedy set in a luxurious European hotel between the wars.',
+          cast: 'Ralph Fiennes, Tony Revolori, Saoirse Ronan',
+          rating: 8.1,
+          imdb: 'https://www.imdb.com/title/tt2278388/',
+          language: 'en'
         },
         {
-          title: "Lost in Thailand",
-          language: "zh",
-          description: "A fun adventure of three men in Thailand.",
-          imdb: "https://www.imdb.com/title/tt2217859/",
-          youtube: "https://www.youtube.com/embed/8pQeQ8bG5oU"
+          title: 'Superbad',
+          poster: 'https://image.tmdb.org/t/p/w500/ek8e8txUyUwd2BNqj6lFEerJfbq.jpg',
+          trailer: 'https://www.youtube.com/embed/4eaZ_48ZYog',
+          description: 'Two co-dependent high school seniors are forced to deal with separation anxiety.',
+          summary: 'A hilarious coming-of-age teen comedy.',
+          cast: 'Jonah Hill, Michael Cera, Christopher Mintz-Plasse',
+          rating: 7.6,
+          imdb: 'https://www.imdb.com/title/tt0829482/',
+          language: 'en'
+        },
+        {
+          title: 'Perfect Strangers',
+          poster: 'https://image.tmdb.org/t/p/w500/6LZoQvKIPnOSiKkz6jXz0gk5y1A.jpg',
+          trailer: 'https://www.youtube.com/embed/3vZqISkz2gM',
+          description: 'A group of friends play a game that reveals their secrets during a dinner party.',
+          summary: 'A Spanish comedy about secrets and relationships.',
+          cast: 'Belén Rueda, Eduard Fernández, Ernesto Alterio',
+          rating: 7.0,
+          imdb: 'https://www.imdb.com/title/tt6401456/',
+          language: 'es'
+        },
+        {
+          title: 'Polis Evo',
+          poster: 'https://image.tmdb.org/t/p/w500/6Qf6lQwQ6QwQ6QwQ6QwQ6QwQ6Qw.jpg',
+          trailer: 'https://www.youtube.com/embed/0QvQF8Qe1e8',
+          description: 'Two police officers with different personalities team up to take down a drug syndicate in Malaysia.',
+          summary: 'A Malaysian buddy cop action-comedy.',
+          cast: 'Shaheizy Sam, Zizan Razak, Nora Danish',
+          rating: 7.2,
+          imdb: 'https://www.imdb.com/title/tt4998772/',
+          language: 'ms'
         }
       ],
       anime: [
         {
-          title: "Spirited Away",
-          language: "ja",
-          description: "A magical adventure in a world of spirits.",
-          imdb: "https://www.imdb.com/title/tt0245429/",
-          youtube: "https://www.youtube.com/embed/ByXuk9QqQkk"
+          title: 'Spirited Away',
+          poster: 'https://image.tmdb.org/t/p/w500/oRvMaJOmapypFUcQqpgHMZA6qL9.jpg',
+          trailer: 'https://www.youtube.com/embed/ByXuk9QqQkk',
+          description: 'A young girl enters a world of spirits and must find her way home.',
+          summary: 'A magical coming-of-age adventure from Studio Ghibli.',
+          cast: 'Rumi Hiiragi, Miyu Irino, Mari Natsuki',
+          rating: 8.6,
+          imdb: 'https://www.imdb.com/title/tt0245429/',
+          language: 'ja'
         },
         {
-          title: "Your Name",
-          language: "ja",
-          description: "A touching story about two teenagers who swap bodies.",
-          imdb: "https://www.imdb.com/title/tt5311514/",
-          youtube: "https://www.youtube.com/embed/3KR8_igDs1Y"
+          title: 'Your Name',
+          poster: 'https://image.tmdb.org/t/p/w500/q719jXXEzOoYaps6babgKnONONX.jpg',
+          trailer: 'https://www.youtube.com/embed/3KR8_igDs1Y',
+          description: 'Two teenagers share a profound, magical connection upon discovering they are swapping bodies.',
+          summary: 'A beautiful, emotional anime romance.',
+          cast: 'Ryunosuke Kamiki, Mone Kamishiraishi',
+          rating: 8.4,
+          imdb: 'https://www.imdb.com/title/tt5311514/',
+          language: 'ja'
+        }
+      ],
+      tvshow: [
+        {
+          title: 'Breaking Bad',
+          poster: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+          trailer: 'https://www.youtube.com/embed/HhesaQXLuRY',
+          description: 'A chemistry teacher turned meth producer.',
+          summary: 'A gripping crime drama about transformation and consequences.',
+          cast: 'Bryan Cranston, Aaron Paul, Anna Gunn',
+          rating: 9.5,
+          imdb: 'https://www.imdb.com/title/tt0903747/',
+          language: 'en'
+        },
+        {
+          title: 'Money Heist',
+          poster: 'https://image.tmdb.org/t/p/w500/mo0FP1GxOFZT4UDde7RFDz5APXF.jpg',
+          trailer: 'https://www.youtube.com/embed/p_PJbmrX4uk',
+          description: 'A criminal mastermind plans the biggest heist in history.',
+          summary: 'Spanish crime drama with twists and turns.',
+          cast: 'Úrsula Corberó, Álvaro Morte, Itziar Ituño',
+          rating: 8.2,
+          imdb: 'https://www.imdb.com/title/tt6468322/',
+          language: 'es'
         }
       ]
     };
@@ -105,12 +344,21 @@
       const movie = filtered[Math.floor(Math.random() * filtered.length)];
       resultDiv.innerHTML = `
         <div class="movie-box">
-          <div class="movie-title">${movie.title}</div>
-          <div class="movie-desc">${movie.description}</div>
-          <div class="movie-links">
-            <a href="${movie.imdb}" target="_blank">IMDb</a>
+          <div style="display:flex;gap:24px;align-items:flex-start;">
+            <img src="${movie.poster}" alt="${movie.title} poster" style="width:180px;height:auto;border-radius:10px;box-shadow:0 2px 12px #0006;">
+            <div style="flex:1;">
+              <div class="movie-title">${movie.title}</div>
+              <div class="movie-summary">${movie.summary}</div>
+              <div class="movie-casting"><b>Cast:</b> ${movie.cast}</div>
+              <div class="movie-desc">${movie.description}</div>
+              <div><b>Rating:</b> ${movie.rating ? movie.rating : 'N/A'}</div>
+              <div class="movie-links">
+                <a href="${movie.imdb}" target="_blank">View more on IMDb</a>
+                <a href="${movie.trailer.replace('embed/', 'watch?v=')}" target="_blank">YouTube Trailer</a>
+              </div>
+            </div>
           </div>
-          <iframe width="320" height="180" src="${movie.youtube}" allowfullscreen></iframe>
+          <iframe src="${movie.trailer}" allowfullscreen></iframe>
         </div>
       `;
     }
