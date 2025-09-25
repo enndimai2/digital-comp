@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Movie Library</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .movie { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    iframe { width: 300px; height: 170px; display: block; margin-top: 5px; }
+    .filters { margin-bottom: 20px; }
+    .filters select { margin-right: 10px; }
+    .pagination { margin-top: 20px; }
+    .pagination button { margin: 0 5px; }
+  </style>
+</head>
+<body>
+  <h1>🎬 Movie Library</h1>
+
+  <!-- 筛选器 -->
+  <div class="filters">
+    <label for="langFilter">Language:</label>
+    <select id="langFilter">
+      <option value="">All</option>
+      <option value="English">English</option>
+      <option value="Chinese">Chinese</option>
+      <option value="Japanese">Japanese</option>
+      <option value="Korean">Korean</option>
+    </select>
+
+    <label for="genreFilter">Genre:</label>
+    <select id="genreFilter">
+        <option value="All">All</option>
+        <option value="Action">Action</option>
+        <option value="Animation">Animation</option>
+        <option value="Anime" >Anime</option>
+        <option value="Comedy">Comedy</option>
+        <option value="Drama">Drama</option>
+        <option value="Romance">Romance</option>
+        <option value="Sci-Fi">Sci-Fi</option>
+        <option value="Thriller">Thriller</option>
+      
+    </select>
+  </div>
+
+  <!-- 电影容器 -->
+  <div id="movies"></div>
+
+  <!-- 分页 -->
+  <div class="pagination">
+    <button id="prevBtn">Prev</button>
+    <span id="pageInfo"></span>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <script>
+    const movies = [
+      
+        // English Movies
+        { title: "Dune", year: 2021, rating: 8.2, tags: ["Sci-Fi", "Action"], language: "English", plays: 120000, imdb: "https://www.imdb.com/title/tt1160419/", youtube: "https://www.youtube.com/embed/8g18jFHCLXk", casting: "Timothée Chalamet, Rebecca Ferguson, Oscar Isaac", description: "Feature adaptation of the classic sci-fi novel.", summary: "A visually stunning epic on desert planet Arrakis." },
+        { title: "Spider-Man: No Way Home", year: 2021, rating: 8.3, tags: ["Action" ], language: "English", plays: 150000, imdb: "https://www.imdb.com/title/tt10872600/", youtube: "https://www.youtube.com/embed/JfVOs4VSpmA", casting: "Tom Holland, Zendaya, Benedict Cumberbatch", description: "Spider-Man faces multiverse threats.", summary: "Action-packed superhero multiverse adventure." },
+        { title: "Everything Everywhere All at Once", year: 2022, rating: 8.1, tags: ["Sci-Fi", "Comedy"], language: "English", plays: 80000, imdb: "https://www.imdb.com/title/tt6710474/", youtube: "https://www.youtube.com/embed/wxN1T1uxQ2g", casting: "Michelle Yeoh, Stephanie Hsu, Ke Huy Quan", description: "A woman discovers multiverse adventures.", summary: "Absurdist, chaotic, yet heartwarming multiverse tale." },
+        { title: "Top Gun: Maverick", year: 2022, rating: 8.5, tags: ["Action", "Drama"], language: "English", plays: 135000, imdb: "https://www.imdb.com/title/tt1745960/", youtube: "https://www.youtube.com/embed/giXco2jaZ_4", casting: "Tom Cruise, Miles Teller, Jennifer Connelly", description: "After decades, Maverick returns as a trainer of new pilots.", summary: "High-speed aerial action and nostalgia-packed drama." },
+        { title: "The Batman", year: 2022, rating: 8.3, tags: ["Action"   ], language: "English", plays: 120000, imdb: "https://www.imdb.com/title/tt1877830/", youtube: "https://www.youtube.com/embed/mqqft2x_Aa4", casting: "Robert Pattinson, Zoë Kravitz, Colin Farrell", description: "Batman investigates Gotham's corruption.", summary: "Dark, atmospheric detective superhero thriller." },
+        { title: "Avatar: The Way of Water", year: 2022, rating: 7.8, tags: ["Sci-Fi" ], language: "English", plays: 110000, imdb: "https://www.imdb.com/title/tt1630029/", youtube: "https://www.youtube.com/embed/d9MyW72ELq0", casting: "Sam Worthington, Zoe Saldana, Sigourney Weaver", description: "Jake Sully returns to Pandora.", summary: "Epic sci-fi adventure in visually immersive world." },
+        { title: "No Time to Die", year: 2021, rating: 7.6, tags: ["Action", "Thriller"], language: "English", plays: 95000, imdb: "https://www.imdb.com/title/tt2382320/", youtube: "https://www.youtube.com/embed/BIhNsAtPbPI", casting: "Daniel Craig, Rami Malek, Léa Seydoux", description: "James Bond faces his latest mission.", summary: "Action-packed finale for Daniel Craig's Bond." },
+        { title: "Encanto", year: 2021, rating: 7.3, tags: ["Animation"], language: "English", plays: 90000, imdb: "https://www.imdb.com/title/tt2953050/", youtube: "https://www.youtube.com/embed/CaimKeDcudo", casting: "Stephanie Beatriz, María Cecilia Botero, John Leguizamo", description: "Magical family in Colombia.", summary: "Colorful animation celebrating family and identity." },
+        { title: "The Fabelmans", year: 2022, rating: 7.5, tags: ["Drama"], language: "English", plays: 65000, imdb: "https://www.imdb.com/title/tt1637706/", youtube: "https://www.youtube.com/embed/9o6G5Z3O6LM", casting: "Gabriel LaBelle, Michelle Williams, Paul Dano", description: "Young boy discovers filmmaking passion.", summary: "Semi-autobiographical story by Spielberg." },
+        { title: "Lightyear", year: 2022, rating: 6.8, tags: ["Animation",   ], language: "English", plays: 55000, imdb: "https://www.imdb.com/title/tt10298810/", youtube: "https://www.youtube.com/embed/W5UiI8PNzck", casting: "Chris Evans, Keke Palmer, Peter Sohn", description: "Origin story of Buzz Lightyear.", summary: "Animated sci-fi adventure in Toy Story universe." },
+
+
+        // Chinese Movies
+      
+        { title: "The Wandering Earth II", year: 2023, rating: 7.9, tags: ["Sci-Fi", "Action"], language: "Chinese", plays: 90000, imdb: "https://www.imdb.com/title/tt13539646/?ref_=ext_shr_lnk", youtube: "https://youtu.be/0TDII5IkI3Y?si=vwPUZ2ro-rqU1iBI", casting: "Wu Jing, Li Xuejian, Andy Lau", description: "Prequel to the Chinese sci-fi blockbuster.", summary: "Earth moves to a new star system to survive." },
+        { title: "Hi, Mom", year: 2021, rating: 7.5, tags: ["Comedy", "Drama"], language: "Chinese", plays: 100000, imdb: "https://www.imdb.com/title/tt14208914/", youtube: "https://www.youtube.com/embed/F6k1v6sneYU", casting: "Jiang Shuying, Jia Ling", description: "Time-traveling daughter meets young mother.", summary: "Heartwarming comedy-drama about family." },
+        { title: "The Eight Hundred", year: 2020, rating: 7.6, tags: ["Drama",   ], language: "Chinese", plays: 50000, imdb: "https://www.imdb.com/title/tt11032036/", youtube: "https://www.youtube.com/embed/fppjI4N-0fA", casting: "Wang Qianyuan, Zhang Yi, Yao Chen", description: "True story of Chinese soldiers in 1937.", summary: "Epic war drama with intense battle sequences." },
+        { title: "Cliff Walkers", year: 2021, rating: 6.9, tags: ["Action", "Thriller"], language: "Chinese", plays: 45000, imdb: "https://www.imdb.com/title/tt14022378/", youtube: "https://www.youtube.com/embed/74yQzqlr9EU", casting: "Zhang Yi, Qin Hailu", description: "Espionage thriller set in 1930s Manchuria.", summary: "Tense, stylish spy drama." },
+        { title: "Better Days", year: 2020, rating: 7.8, tags: ["Drama", "Romance"], language: "Chinese", plays: 52000, imdb: "https://www.imdb.com/title/tt11355212/", youtube: "https://www.youtube.com/embed/tjX5FgyOqYk", casting: "Yi Yang Qian Xi, Zhou Dongyu", description: "Bullying and teenage struggles.", summary: "Emotional youth drama with romance elements." },
+        { title: "My Country, My Parents", year: 2021, rating: 7.4, tags: ["Drama"], language: "Chinese", plays: 40000, imdb: "https://www.imdb.com/title/tt15605126/", youtube: "https://www.youtube.com/embed/IbK4ZyFdfMg", casting: "Jackie Chan, Zhang Ziyi", description: "Anthology of patriotic stories.", summary: "Drama celebrating family and nation." },
+        { title: "Leap", year: 2020, rating: 7.3, tags: ["Animation",    ], language: "Chinese", plays: 38000, imdb: "https://www.imdb.com/title/tt11260714/", youtube: "https://www.youtube.com/embed/Nm6y0fVZFKg", casting: "Ni Ni, Sun Li", description: "Chinese women's volleyball story.", summary: "Inspiring sports animation." },
+        { title: "Detective Chinatown 3", year: 2021, rating: 6.7, tags: ["Comedy", "Action"], language: "Chinese", plays: 60000, imdb: "https://www.imdb.com/title/tt13966844/", youtube: "https://www.youtube.com/embed/0yCMuEUXyAc", casting: "Wang Baoqiang, Liu Haoran", description: "Detectives solving a mystery in Tokyo.", summary: "Funny action-comedy mystery." },
+        { title: "The Battle at Lake Changjin II", year: 2022, rating: 7.1, tags: [  , "Drama"], language: "Chinese", plays: 47000, imdb: "https://www.imdb.com/title/tt15510978/", youtube: "https://www.youtube.com/embed/DQEz3wC4d1Y", casting: "Wu Jing, Jackson Yee", description: "Chinese war epic continuation.", summary: "Epic depiction of Korean War battle." },
+        { title: "Sister", year: 2021, rating: 7.0, tags: ["Drama"], language: "Chinese", plays: 42000, imdb: "https://www.imdb.com/title/tt13202580/", youtube: "https://www.youtube.com/embed/xkEdvX3kxe8", casting: "Zhao Jinmai, Yin Fang", description: "Family drama about sibling relationships.", summary: "Emotional portrayal of family bonds." },
+
+        // Japanese Movies
+        { title: "Jujutsu Kaisen 0", year: 2021, rating: 8.2, tags: ["Anime", "Action"], language: "Japanese", plays: 60000, imdb: "https://www.imdb.com/title/tt11866324/", youtube: "https://www.youtube.com/embed/xiR1_yUPMe0", casting: "Megumi Ogata, Nobunaga Shimazaki, Kana Hanazawa", description: "Anime movie prequel to popular series.", summary: "Action-packed, supernatural anime adventure." },
+        { title: "Your Name", year: 2020, rating: 8.4, tags: ["Anime", "Romance"], language: "Japanese", plays: 125000, imdb: "https://www.imdb.com/title/tt5311514/", youtube: "https://www.youtube.com/embed/3KR8_igDs1Y", casting: "Ryunosuke Kamiki, Mone Kamishiraishi", description: "Two teens swap bodies mysteriously.", summary: "Emotional anime romance with stunning visuals." },
+        { title: "Weathering with You", year: 2020, rating: 7.5, tags: ["Anime",   ], language: "Japanese", plays: 78000, imdb: "https://www.imdb.com/title/tt9426210/", youtube: "https://www.youtube.com/embed/Q6iK6DjV_iE", casting: "Kotaro Daigo, Nana Mori", description: "A boy meets a girl who controls weather.", summary: "Visually stunning romantic anime." },
+        { title: "Belle", year: 2021, rating: 7.6, tags: ["Anime", "Drama"], language: "Japanese", plays: 45000, imdb: "https://www.imdb.com/title/tt13610084/", youtube: "https://www.youtube.com/embed/m2xFAoShydo", casting: "Kaho Nakamura, Mone Kamishiraishi", description: "Girl enters virtual world.", summary: "Emotional anime with music theme." },
+        { title: "Dragon Ball Super: Super Hero", year: 2022, rating: 7.1, tags: ["Anime", "Action"], language: "Japanese", plays: 52000, imdb: "https://www.imdb.com/title/tt12806410/", youtube: "https://www.youtube.com/embed/cdKz0N0nZHE", casting: "Masako Nozawa, Ryo Horikawa", description: "Goku and friends face new villains.", summary: "Action-packed anime adventure." },
+        { title: "One Piece Film: Red", year: 2022, rating: 7.4, tags: ["Anime", "Action"], language: "Japanese", plays: 56000, imdb: "https://www.imdb.com/title/tt15293336/", youtube: "https://www.youtube.com/embed/w0Y5yDBoRC8", casting: "Mayumi Tanaka, Kazuya Nakai", description: "Straw Hat Pirates face new challenge.", summary: "Action-packed anime with music focus." },
+        { title: "Sing a Bit of Harmony", year: 2021, rating: 7.0, tags: ["Anime",   ], language: "Japanese", plays: 42000, imdb: "https://www.imdb.com/title/tt14494544/", youtube: "https://www.youtube.com/embed/4f8t9Ak1jrY", casting: "Seiichiro Yamashita, Kana Hanazawa", description: "AI girl joins school band.", summary: "Music and friendship anime story." },
+        { title: "Drifting Home", year: 2022, rating: 6.9, tags: ["Anime",   ], language: "Japanese", plays: 38000, imdb: "https://www.imdb.com/title/tt21796254/", youtube: "https://www.youtube.com/embed/wZq0JXhXbtA", casting: "Ryōta Takeuchi, Kana Hanazawa", description: "Children trapped in floating apartment.", summary: "Adventure anime with emotional depth." },
+        { title: "Blue Thermal", year: 2022, rating: 6.8, tags: ["Anime",    ], language: "Japanese", plays: 36000, imdb: "https://www.imdb.com/title/tt14552906/", youtube: "https://www.youtube.com/embed/9lK94PX3u2U", casting: "Ryohei Kimura, Haruka Tomatsu", description: "Gliding sports anime.", summary: "Inspiring sports story in anime format." },
+        { title: "The Deer King", year: 2021, rating: 7.2, tags: ["Anime",   ], language: "Japanese", plays: 39000, imdb: "https://www.imdb.com/title/tt15062582/", youtube: "https://www.youtube.com/embed/EXr4GJZZvNQ", casting: "Ryota Takeuchi, Kana Hanazawa", description: "Post-war fantasy world.", summary: "Visually stunning epic anime adventure." },
+
+        
+        // Korean Movies
+        
+        { title: "Kingdom: Ashin of the North", year: 2021, rating: 7.2, tags: ["Action", "Thriller"], language: "Korean", plays: 50000, imdb: "https://www.imdb.com/title/tt13556316/", youtube: "https://www.youtube.com/embed/4NWH02v5ZxY", casting: "Jun Ji-hyun, Kim Si-a, Park Byung-eun", description: "Prequel to popular Korean zombie series.", summary: "Intense historical thriller with undead action." },
+        { title: "The Roundup", year: 2022, rating: 7.8, tags: ["Action",    ], language: "Korean", plays: 67000, imdb: "https://www.imdb.com/title/tt18993508/", youtube: "https://www.youtube.com/embed/Ynki1Y2vZaU", casting: "Ma Dong-seok, Son Suk-ku", description: "Detectives chase brutal criminals in Seoul.", summary: "High-octane action-crime thriller." },
+        { title: "Broker", year: 2022, rating: 7.3, tags: ["Drama"], language: "Korean", plays: 42000, imdb: "https://www.imdb.com/title/tt13198506/", youtube: "https://www.youtube.com/embed/lrK6Ob7vCVE", casting: "Song Kang-ho, Gang Dong-won, Bae Doona", description: "Baby delivery brokers.", summary: "Heartfelt drama exploring family and society." },
+        { title: "Decision to Leave", year: 2022, rating: 7.4, tags: ["Thriller", "Romance"], language: "Korean", plays: 46000, imdb: "https://www.imdb.com/title/tt10954600/", youtube: "https://www.youtube.com/embed/pCxlJb5yX20", casting: "Park Hae-il, Tang Wei", description: "Detective investigates mysterious death.", summary: "Stylish thriller with romantic undertone." },
+        { title: "Alienoid", year: 2022, rating: 6.9, tags: ["Sci-Fi", "Action"], language: "Korean", plays: 38000, imdb: "https://www.imdb.com/title/tt14736216/", youtube: "https://www.youtube.com/embed/PCqsbB8rESQ", casting: "Ryu Jun-yeol, Kim Woo-bin", description: "Time-traveling alien adventure.", summary: "Action-packed sci-fi thriller." },
+        { title: "Hunt", year: 2022, rating: 7.0, tags: ["Action", "Thriller"], language: "Korean", plays: 40000, imdb: "https://www.imdb.com/title/tt16361166/", youtube: "https://www.youtube.com/embed/E2dQfLqAye8", casting: "Lee Jung-jae, Jung Woo-sung", description: "Spy thriller in 1980s Korea.", summary: "Intense espionage action thriller." },
+        { title: "Hansan: Rising Dragon", year: 2022, rating: 7.1, tags: [  , "Action"], language: "Korean", plays: 37000, imdb: "https://www.imdb.com/title/tt17384596/", youtube: "https://www.youtube.com/embed/3EhK2hV5FhM", casting: "Park Hae-il, Choi Min-ho", description: "Historical naval battle.", summary: "Epic war action movie." },
+        { title: "Emergency Declaration", year: 2022, rating: 6.8, tags: ["Thriller", "Drama"], language: "Korean", plays: 36000, imdb: "https://www.imdb.com/title/tt15063692/", youtube: "https://www.youtube.com/embed/gbn6S-H_XbE", casting: "Song Kang-ho, Lee Byung-hun", description: "Airplane emergency crisis.", summary: "High tension drama thriller." },
+        { title: "Confession", year: 2022, rating: 6.9, tags: [   , "Thriller"], language: "Korean", plays: 34000, imdb: "https://www.imdb.com/title/tt15334568/", youtube: "https://www.youtube.com/embed/IWvYfDElEsA", casting: "Kim Sang-kyung, Kwon Yul", description: "Crime investigation.", summary: "Intense suspense thriller." },
+        { title: "Wonder Woman 1984 (Korean Dub)", year: 2020, rating: 5.9, tags: ["Action",   ], language: "Korean", plays: 30000, imdb: "https://www.imdb.com/title/tt7126948/", youtube: "https://www.youtube.com/embed/ssC8c0P4FC0", casting: "Gal Gadot, Chris Pine", description: "Superhero sequel in Korean dub.", summary: "Action-adventure film for Korean audience." },
+    ];
+
+    // ======= 分页 & 渲染逻辑 =======
+    const moviesPerPage = 20;
+    let currentPage = 1;
+
+    function getFilteredMovies() {
+      const lang = document.getElementById("langFilter").value;
+      const genre = document.getElementById("genreFilter").value;
+      return movies.filter(m => {
+        const langMatch = lang === "" || m.language === lang;
+        const genreMatch = genre === "" || m.tags.includes(genre);
+        return langMatch && genreMatch;
+      });
+    }
+
+    function renderMovies() {
+      const movieContainer = document.getElementById("movies");
+      movieContainer.innerHTML = "";
+
+      const filtered = getFilteredMovies();
+      const totalPages = Math.ceil(filtered.length / moviesPerPage);
+      if (currentPage > totalPages) currentPage = totalPages || 1;
+
+      const start = (currentPage - 1) * moviesPerPage;
+      const end = start + moviesPerPage;
+      const pageMovies = filtered.slice(start, end);
+
+      pageMovies.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "movie";
+        div.innerHTML = `
+          <h3>${m.title} (${m.year}) ⭐${m.rating}</h3>
+          <p><b>Language:</b> ${m.language} | <b>Genre:</b> ${m.tags.join(", ")}</p>
+          <p><b>Cast:</b> ${m.casting}</p>
+          <p>${m.description}</p>
+          <p><i>${m.summary}</i></p>
+          <a href="${m.imdb}" target="_blank">IMDB</a>
+          <iframe src="${m.youtube}" allowfullscreen></iframe>
+        `;
+        movieContainer.appendChild(div);
+      });
+
+      document.getElementById("pageInfo").textContent = `Page ${currentPage} / ${totalPages || 1}`;
+    }
+
+    // ======= 翻页 =======
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      if (currentPage > 1) { currentPage--; renderMovies(); }
+    });
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      const filtered = getFilteredMovies();
+      const totalPages = Math.ceil(filtered.length / moviesPerPage);
+      if (currentPage < totalPages) { currentPage++; renderMovies(); }
+    });
+
+    // ======= 筛选触发 =======
+    document.getElementById("langFilter").addEventListener("change", () => { currentPage = 1; renderMovies(); });
+    document.getElementById("genreFilter").addEventListener("change", () => { currentPage = 1; renderMovies(); });
+
+    // 初始渲染
+    renderMovies();
+  </script>
+</body>
+</html>
