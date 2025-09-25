@@ -1,3 +1,4 @@
+  <!-- All movie data scripts and merging logic moved to the bottom -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,7 +17,14 @@
       transition: background 0.2s;
     }
     .sidebar a:hover { background: #f0f0f0; }
-    .main { flex: 1; padding: 20px; overflow-y: auto; }
+    .main {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      margin-right: 340px; /* Add margin to prevent overlap with right-block */
+      min-width: 0;
+      box-sizing: border-box;
+    }
     .search {
       width: 100%; padding: 12px 15px; margin-bottom: 20px;
       border: 1px solid #ddd; border-radius: 10px; font-size: 14px;
@@ -60,9 +68,18 @@
     }
     .card { position: relative; }
     .right-block {
-      width: 320px; background: #fff; border-left: 1px solid #eee;
-      padding: 20px; min-height: 100vh; box-sizing: border-box;
-      position: fixed; right: 0; top: 0; z-index: 10;
+      width: 320px;
+      background: #fff;
+      border-left: 1px solid #eee;
+      padding: 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+      position: fixed;
+      right: 0;
+      top: 0;
+      z-index: 10;
+      height: 100vh;
+      overflow-y: auto;
     }
     .recommender-section {
       background: #fff; border-radius: 12px; padding: 18px 18px 10px 18px; margin-bottom: 24px;
@@ -77,7 +94,7 @@
     .recommender-result { margin-top: 10px; font-size: 15px; color: #333; }
   </style>
 </head>
-<body>
+<body style="min-width: 1200px; min-height: 700px; max-width: 1920px; margin: 0 auto; background: #f9f9f9;">
   <!-- Sidebar removed as per requirements -->
   <div class="main">
     <div class="recommender-section">
@@ -111,18 +128,29 @@
     <div id="python-block-placeholder"></div>
   </div>
   <script src="../movies-english-scifi-thriller.js"></script>
+  <script src="../Korean Movies (Drama + Thriller + Horror).js"></script>
+  <script src="../Japanese movies.js"></script>
+  <script src="../French and Spanish art and thriller movies.js"></script>
+  <script src="../Chinese movies.js"></script>
+  <script src="../Malaysian Malay movies.js"></script>
+  <script src="../Malaysian Chinese movies.js"></script>
   <script>
     // Load movies from all included JS files
     let movies = [];
-    if (typeof defineMovies === 'function') {
-      movies = defineMovies();
-    }
-    // On page load, show 6 random movies in preview
+    if (typeof defineMovies === 'function') movies = defineMovies();
+    if (typeof defineMoviesKorean === 'function') movies = movies.concat(defineMoviesKorean());
+    if (typeof defineMoviesJapanese === 'function') movies = movies.concat(defineMoviesJapanese());
+    if (typeof defineMoviesFrenchSpanish === 'function') movies = movies.concat(defineMoviesFrenchSpanish());
+    if (typeof defineMoviesChinese === 'function') movies = movies.concat(defineMoviesChinese());
+    if (typeof defineMoviesMalay === 'function') movies = movies.concat(defineMoviesMalay());
+    if (typeof defineMoviesMalaysianChinese === 'function') movies = movies.concat(defineMoviesMalaysianChinese());
+
+    // On page load, show 20 random movies in preview
     function getRandomMovies(arr, n) {
       const shuffled = arr.slice().sort(() => 0.5 - Math.random());
       return shuffled.slice(0, n);
     }
-  let currentList = getRandomMovies(movies, 20);
+    let currentList = getRandomMovies(movies, 20);
     const grid = document.getElementById("movieGrid");
     const searchInput = document.getElementById("searchInput");
     function renderMovies(list) {
@@ -145,23 +173,20 @@
       }
       sorted.forEach(m => {
         const card = document.createElement("div");
-        card.className = "card";
-        const tags = m.tags || m.genre || [];
         const langColor = getLanguageColor(m.language);
+        card.className = "card";
+        card.style.border = `3px solid ${langColor}`;
+        card.style.boxShadow = `0 2px 12px ${langColor}33`;
+        const tags = m.tags || m.genre || [];
         card.innerHTML = `
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <h3>${m.title}</h3>
-            <span title="${m.language || ''}" style="display:inline-block;width:16px;height:16px;border-radius:50%;background:${langColor};margin-left:8px;border:2px solid #fff;"></span>
           </div>
-          <span>${m.year}${m.rating ? ` <span class=\"rating\">⭐${m.rating}</span>` : ''}</span>
-          <div class=\"tags\">${tags.map(tag => `<span class='tag'>${tag}</span>`).join('')}</div>
-          <div style=\"margin:8px 0 4px 0;font-size:13px;color:#666;\"><b>Casting:</b> ${m.casting || ''}</div>
-          <div style=\"margin-bottom:4px;font-size:13px;color:#666;\"><b>Description:</b> ${m.description || ''}</div>
-          <div style=\"margin-bottom:4px;font-size:13px;color:#666;\"><b>Summary:</b> ${m.summary || ''}</div>
-          <div style=\"margin-bottom:4px;\">
-            <a href=\"${m.imdb}\" target=\"_blank\" style=\"color:#4ecdc4;text-decoration:underline;font-size:13px;\">IMDb</a>
+          <span>${m.year}</span>
+          <div class="tags">${tags.map(tag => `<span class='tag'>${tag}</span>`).join('')}</div>
+          <div style="margin-top:8px;">
+            ${m.imdb ? `<a href='${m.imdb}' target='_blank' onclick='event.stopPropagation()' style='color:#4ecdc4;text-decoration:underline;font-size:13px;'>IMDb</a>` : ''}
           </div>
-          ${m.youtube ? `<div style='margin-top:8px;'><iframe width='100%' height='120' src='${m.youtube}' frameborder='0' allowfullscreen style='border-radius:8px;'></iframe></div>` : ''}
         `;
         card.onclick = function() {
           showMovieDetail(m);
@@ -181,17 +206,22 @@
       }
       // Use tags or genre for display, fallback if missing
       const tags = movie.tags || movie.genre || [];
-      modal.innerHTML = `<div style='background:#fff;color:#222;border-radius:16px;max-width:520px;width:90vw;padding:32px 28px;box-shadow:0 8px 32px #0005;position:relative;'>
+      const langColor = getLanguageColor(movie.language);
+      modal.innerHTML = `<div style='background:#fff;color:#222;border-radius:16px;max-width:520px;width:90vw;padding:32px 28px;box-shadow:0 8px 32px #0005;position:relative;border:3px solid ${langColor};'>
         <button onclick='document.getElementById("movie-detail-modal").remove()' style='position:absolute;top:12px;right:18px;font-size:22px;background:none;border:none;cursor:pointer;'>&times;</button>
         <h2 style='margin-bottom:8px;'>${movie.title}</h2>
         <div style='margin-bottom:8px;'>
-          <span style='font-size:15px;color:#888;'>${movie.year}${movie.language ? ` | ${movie.language}` : ''}</span>
+          <span style='font-size:15px;color:#888;'>${movie.year}${movie.rating ? ` <span class="rating">⭐${movie.rating}</span>` : ''}</span>
+        </div>
+        <div style='margin-bottom:8px;'>
+          <span style='display:inline-block;width:18px;height:18px;border-radius:50%;background:${langColor};margin-right:8px;border:2px solid #fff;vertical-align:middle;'></span>
+          <span style='font-size:14px;color:#555;'>${movie.language || ''}</span>
         </div>
         <div style='margin-bottom:8px;'>${tags.map(tag => `<span class='tag' style='margin-right:6px;'>${tag}</span>`).join('')}</div>
-        <div style='margin-bottom:8px;'><b>Casting:</b> ${movie.casting || ''}</div>
-        <div style='margin-bottom:8px;'><b>Description:</b> ${movie.description || ''}</div>
-        <div style='margin-bottom:8px;'><b>Summary:</b> ${movie.summary || ''}</div>
-        <div style='margin-bottom:8px;'><a href='${movie.imdb}' target='_blank' style='color:#4ecdc4;text-decoration:underline;'>IMDb</a></div>
+        <div style='font-size:14px;color:#444;margin-bottom:8px;'><b>Plot Summary:</b> ${movie.summary || "<span style=\"color:#bbb\">N/A</span>"}</div>
+        <div style='font-size:14px;color:#444;margin-bottom:8px;'><b>Casting:</b> ${movie.casting || "<span style=\"color:#bbb\">N/A</span>"}</div>
+        <div style='font-size:14px;color:#444;margin-bottom:8px;'><b>Description:</b> ${movie.description || "<span style=\"color:#bbb\">N/A</span>"}</div>
+  <div style='margin-bottom:8px;'><a href='${movie.imdb}' target='_blank' style='color:#4ecdc4;text-decoration:underline;' onclick='event.stopPropagation()'>IMDb</a></div>
         <div style='margin-top:12px;'>
           ${movie.youtube ? `<iframe width='420' height='236' src='${movie.youtube}' frameborder='0' allowfullscreen style='border-radius:10px;width:100%;max-width:420px;'></iframe>` : ''}
         </div>
