@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommender & Subscription</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #141414, #0a0a0a); color: white; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 40px; padding: 20px; }
+        .logo { font-size: 2.5rem; font-weight: bold; background: linear-gradient(45deg, #e50914, #f5f5f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        .tagline { font-size: 1.2rem; color: #b3b3b3; margin-bottom: 30px; }
+        
+        /* Subscription Calculator Styles */
+        .subscription-section {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        .subscription-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #e50914;
+            text-align: center;
+        }
+        .subscription-form {
+            display: grid;
+            gap: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            font-size: 1.1rem;
+            color: #f5f5f1;
+        }
+        select, input {
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #333;
+            background: rgba(50, 50, 50, 0.7);
+            color: white;
+            font-size: 1rem;
+        }
+        .calculate-btn {
+            background: #e50914;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        .calculate-btn:hover {
+            background: #ff4d4d;
+        }
+
+        /* Fade-in effect for subscription result */
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(229, 9, 20, 0.2);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+        }
+        .result.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Transition Banner Style */
+        .transition-banner {
+            text-align: center;
+            margin: 40px 0;
+            font-size: 1.3rem;
+            color: #b3b3b3;
+            letter-spacing: 0.5px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        /* Existing Movie Recommender Styles */
+        .question-container { background: rgba(30, 30, 30, 0.8); border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); }
+        .question { font-size: 1.5rem; margin-bottom: 25px; color: #f5f5f1; }
+        .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .option-btn { background: rgba(50, 50, 50, 0.7); border: 2px solid #333; color: #f5f5f1; padding: 15px; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; text-align: center; }
+        .option-btn:hover { background: rgba(229, 9, 20, 0.3); border-color: #e50914; transform: translateY(-2px); }
+        .option-btn.selected { background: rgba(229, 9, 20, 0.7); border-color: #e50914; color: white; box-shadow: 0 0 20px rgba(229, 9, 20, 0.5); }
+        .progress-container { width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; margin: 20px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #e50914, #ff4d4d); width: 0%; transition: width 0.5s ease; }
+        .results-container { display: none; background: rgba(30, 30, 30, 0.9); border-radius: 15px; padding: 30px; margin-top: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+        .results-title { font-size: 2rem; margin-bottom: 20px; text-align: center; color: #e50914; }
+        .movies-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .movie-card { background: rgba(50, 50, 50, 0.7); border-radius: 10px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; position: relative; }
+        .movie-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(229, 9, 20, 0.3); }
+        .movie-poster { width: 100%; height: 350px; background-size: cover; background-position: center; position: relative; }
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 255, 255, 0.2); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+        .movie-card:hover .play-icon { opacity: 1; }
+        .play-icon::after { content: "ℹ"; color: white; font-size: 24px; }
+        .movie-info { padding: 15px; }
+        .movie-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 8px; color: #f5f5f1; }
+        .movie-genre { color: #b3b3b3; font-size: 0.9rem; margin-bottom: 5px; }
+        .movie-rating { color: #ffd700; font-weight: bold; }
+        .movie-year { color: #666; font-size: 0.8rem; margin-top: 5px; }
+        .premium-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(45deg, #e50914, #ff4d4d);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+        .navigation { display: flex; justify-content: space-between; margin-top: 20px; }
+        .nav-btn { background: #e50914; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background 0.3s ease; }
+        .nav-btn:hover { background: #f5f5f1; color: #e50914; }
+        .nav-btn:disabled { background: #555; cursor: not-allowed; }
+        .restart-btn { background: transparent; border: 2px solid #e50914; color: #e50914; }
+        .restart-btn:hover { background: rgba(229, 9, 20, 0.1); }
+        .current-step { text-align: center; color: #b3b3b3; margin-bottom: 10px; font-size: 0.9rem; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal { background: #1a1a1a; border-radius: 15px; max-width: 600px; width: 90%; padding: 30px; position: relative; transform: scale(0.8); transition: transform 0.3s ease; }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .modal-poster { width: 100%; height: 300px; background-size: cover; background-position: center; border-radius: 10px; margin-bottom: 20px; }
+        .modal-title { font-size: 1.8rem; margin-bottom: 10px; color: #e50914; }
+        .modal-details { color: #b3b3b3; line-height: 1.6; }
+        .modal-genre, .modal-year, .modal-rating { margin-bottom: 8px; }
+        @media (max-width: 768px) { 
+            .options { grid-template-columns: 1fr; } 
+            .logo { font-size: 2rem; } 
+            .question { font-size: 1.2rem; } 
+            .modal { width: 95%; padding: 20px; }
+            .subscription-form { max-width: 100%; }
+            .transition-banner { font-size: 1.1rem; margin: 30px auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">MOVIE RECOMMENDER</div>
+            <p class="tagline">Discover the best 2023-2025 movies & Calculate your subscription</p>
+        </header>
+        
+        <!-- Subscription Calculator Section -->
+        <div class="subscription-section">
+            <h2 class="subscription-title">Subscription Calculator</h2>
+            <form class="subscription-form" id="subscriptionForm">
+                <div class="form-group">
+                    <label for="plan">Select Subscription Plan:</label>
+                    <select id="plan" required>
+                        <option value="">Choose a plan</option>
+                        <option value="Basic">Basic - RM 25/month</option>
+                        <option value="Standard">Standard - RM 40/month</option>
+                        <option value="Premium">Premium - RM 55/month</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="months">Number of Months:</label>
+                    <input type="number" id="months" min="1" max="24" placeholder="Enter number of months (1-24)" required>
+                </div>
+                <button type="submit" class="calculate-btn">Calculate Total Cost</button>
+                <div class="result" id="subscriptionResult"></div>
+            </form>
+        </div>
+
+        <!-- Transition Banner -->
+        <div class="transition-banner">
+            🎬 Done calculating your subscription?  
+            Now let’s find the perfect movies for you!
+        </div>
+        
+        <!-- Movie Recommender Section -->
+        <div class="question-container">
+            <div class="current-step">Question <span id="current-question">1</span> of 4</div>
+            <div class="question" id="question-text">What's your preferred movie genre?</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="options" id="options-container"></div>
+            <div class="navigation">
+                <button class="nav-btn restart-btn" id="restart-btn">Restart</button>
+                <button class="nav-btn" id="next-btn" disabled>Next</button>
+            </div>
+        </div>
+        
+        <div class="results-container" id="results-container">
+            <h2 class="results-title">Your Movie Recommendations</h2>
+            <div class="movies-grid" id="movies-grid"></div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <button class="close-modal" id="close-modal">×</button>
+            <div class="modal-poster" id="modal-poster"></div>
+            <h3 class="modal-title" id="modal-title"></h3>
+            <div class="modal-details">
+                <div class="modal-genre" id="modal-genre"></div>
+                <div class="modal-year" id="modal-year"></div>
+                <div class="modal-rating" id="modal-rating"></div>
+                <div class="modal-description" id="modal-description"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variable to store user's subscription plan
+        let userPlan = null;
+
+        // Subscription Calculator Logic (Converted from C++)
+        document.getElementById('subscriptionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const plan = document.getElementById('plan').value;
+            const months = parseInt(document.getElementById('months').value);
+            const resultDiv = document.getElementById('subscriptionResult');
+            
+            let costPerMonth = 0;
+            let validPlan = true;
+            
+            // Convert plan to match C++ logic (case-insensitive)
+            const planLower = plan.toLowerCase();
+            
+            if (planLower === "basic") {
+                costPerMonth = 25;
+                userPlan = "Basic";
+            } else if (planLower === "standard") {
+                costPerMonth = 40;
+                userPlan = "Standard";
+            } else if (planLower === "premium") {
+                costPerMonth = 55;
+                userPlan = "Premium";
+            } else {
+                resultDiv.classList.remove('show');
+                setTimeout(() => {
+                    resultDiv.innerHTML = '<span style="color: #ff4d4d;">Invalid plan selected.</span>';
+                    resultDiv.style.backgroundColor = 'rgba(255, 77, 77, 0.2)';
+                    resultDiv.classList.add('show');
+                }, 50);
+                return;
+            }
+            
+            const total = costPerMonth * months;
+            
+            resultDiv.classList.remove('show');
+            setTimeout(() => {
+                resultDiv.innerHTML = `
+                    <strong>Plan:</strong> ${plan}<br>
+                    <strong>Months:</strong> ${months}<br>
+                    <strong>Total Subscription Cost:</strong> RM ${total.toFixed(2)}
+                `;
+                resultDiv.classList.add('show');
+            }, 50);
+        });
+
+        // Existing Movie Recommender Code
+        const movies = [
+            { title: "Dune: Part Two", genre: "Sci-Fi", rating: "8.7/10", year: "2024", poster: "https://placehold.co/300x450/1a1a1a/ffffff?text=Dune+Part+Two", description: "Paul Atreides unites with the Fremen to seek revenge against the Harkonnens.", isPremium: false },
+            { title: "Deadpool & Wolverine", genre: "Action", rating: "8.5/10", year: "2024", poster: "https://placehold.co/300x450/1a1a1a/ffffff?text=Deadpool+Wolverine", description: "Deadpool and Wolverine team up for the first time in the MCU.", isPremium: false },
+            { title: "Inside Out 2", genre: "Animation", rating: "8.3/10", year: "2024", poster: "https://placehold.co/300x450/1a1a1a/ffffff?text=Inside+Out+2", description: "Riley enters adolescence with new emotions joining her inner world.", isPremium: false },
+            { title: "Furiosa: A Mad Max Saga", genre: "Action", rating: "7.8/10", year: "2024", poster: "https://placehold.co/300x450/1a1a1a/ffffff?text=Furiosa", description: "Young Furiosa's origin story in the post-apocalyptic wasteland.", isPremium: false },
+            { title: "The Fall Guy", genre: "Action", rating: "7.5/10", year: "2024", poster: "https://placehold.co/300x450/1a1a1a/ffffff?text=The+Fall+Guy", description: "A stuntman gets entangled in a dangerous Hollywood conspiracy.", isPremium: false },
+            { title: "Kingdom of the Planet of the Apes", genre: "Sci-Fi", rating: "7.2/10", year: "2024", poster: "https://placehold.co/300x450/1a1a1a/ffffff?text=Planet+of+Apes", description: "New generations of apes and humans face fresh challenges after Caesar's legacy.", isPremium: false },
+            { title: "A Quiet Place: Day One", genre: "Thriller", rating: "7.9/10", year: "2024", poster: "https://placehold.co/300x450/1a1a1a/ffffff?text=A+Quiet+Place", description: "The first day of the alien invasion that silenced the world.", isPremium: false },
+            { title: "Kung Fu Panda 4", genre: "Animation", rating: "7.7/10", year: "2024", poster: "https://placehold.co/300x450/1a1a1a/ffffff?text=Kung+Fu+Panda+4", description: "Po must train a new Dragon Warrior to face emerging threats.", isPremium: false },
+            { title: "Ne Zha 2", genre: "Animation", rating: "8.9/10", year: "2024", poster: "https://placehold.co/300x450/d42300/ffffff?text=Ne+Zha+2", description: "Ne Zha returns to face greater challenges and destiny's trials.", isPremium: false },
+            { title: "The Legend of the Condor Heroes", genre: "Fantasy", rating: "7.8/10", year: "2024", poster: "https://placehold.co/300x450/d42300/ffffff?text=Condor+Heroes", description: "Guo Jing and Huang Rong's wuxia legend of patriotism and chivalry.", isPremium: false },
+            { title: "No More Bets 2", genre: "Thriller", rating: "8.1/10", year: "2024", poster: "https://placehold.co/300x450/d42300/ffffff?text=No+More+Bets+2", description: "Exposing the dark truth behind online scams and fraud.", isPremium: false },
+            { title: "The Pig, the Snake and the Pigeon", genre: "Action", rating: "7.3/10", year: "2024", poster: "https://placehold.co/300x450/d42300/ffffff?text=Pig+Snake+Pigeon", description: "A wanted criminal seeks redemption by eliminating two greater evils.", isPremium: false },
+            {title: "Chainsaw Man–The Movie: Reze Arc", genre: "Animation", rating: "8.8/10", year: "2025", poster: "https://placehold.co/300x450/d42300/ffffff?text=Chainsaw+Man", description: "Denji encounters a new romantic interest, Reze, who works at a coffee café.", isPremium: true },
+            { title: "Jurassic World: Rebirth", genre: "Adventure", rating: "5.9/10", year: "2025", poster: "https://placehold.co/300x450/d42300/ffffff?text=Jurassic+World", description: "Five years post-Jurassic World: Dominion (2022).", isPremium: true },
+            { title: "How To Make Millions before Grandma Dies", genre: "Drama", rating: "7.9/10", year: "2024", poster: "https://placehold.co/300x450/d42300/ffffff?text=Lahn+Mah", description: "A man, driven by his desire for a multi-million dollar inheritance, begins to care for his terminally ill grandmother.", isPremium: false },
+            { title: "Detective Conan: One-eyed Flashback", genre: "Animation", rating: "9.8/10", year: "2025", poster: "https://placehold.co/300x450/d42300/ffffff?text=Detective+Conan", description: "Detectives Conan and Kogoro Mouri are pulled into a mystery connected to the past of police inspector Kansuke Yamato.", isPremium: true },
+            { title: "The Shadow's Edge", genre: "Action", rating: "7.6/10", year: "2025", poster: "https://placehold.co/300x450/d42300/ffffff?text=Shadow's+Edge", description: "Macau Police brings the tracking expert police officer out of retirement to help catch a dangerous group of professional thieves.", isPremium: true },
+            { title: "Demon Slayer: Kimetsu no Yaiba Infinity Castle ", genre: "Animation", rating: "8.6/10", year: "2025", poster: "https://placehold.co/300x450/d42300/ffffff?text=Demon+Slayer", description: "The Demon Slayer Corps are drawn into the Infinity Castle, where Tanjiro and the Hashira face terrifying Upper Rank demons in a desperate fight as the final battle against Muzan Kibutsuji begins.", isPremium: true },
+            { title: "Dead to Rights", genre: "Drama", rating: "8.1/10", year: "2025", poster: "https://placehold.co/300x450/d42300/ffffff?text=Nanjing+Zhao+Xiang+Guan", description: "During the 1937 Nanjing Massacre, postman A Chang posed as a photo developer, helping Japanese forces while secretly sheltering Chinese refugees.", isPremium: true },
+            { title: "The Legend of Hei 2", genre: "Animation", rating: "8.1/10", year: "2025", poster: "https://placehold.co/300x450/d42300/ffffff?text=Luo+Xiaohei+Zhan+Ji+2", description: "The film tells the story of a 'new mission' from the Monster Hall.", isPremium: true }
+        ];
+
+        const questions = [
+            { question: "What's your preferred movie genre?", options: ["Action", "Drama", "Sci-Fi", "Fantasy", "Animation", "Thriller", "Comedy"] },
+            { question: "What's your preferred movie length?", options: ["Short (< 90 min)", "Medium (90-120 min)", "Long (> 120 min)"] },
+            { question: "What's your preferred rating range?", options: ["High (8.0+)", "Medium (7.0-7.9)", "Any Rating"] },
+            { question: "What's your mood today?", options: ["Excited", "Thoughtful", "Adventurous", "Relaxed"] }
+        ];
+
+        let currentQuestion = 0, selectedOptions = [], selectedGenre = "";
+        const qt = document.getElementById('question-text'), oc = document.getElementById('options-container');
+        const nb = document.getElementById('next-btn'), rb = document.getElementById('restart-btn');
+        const rc = document.getElementById('results-container'), mg = document.getElementById('movies-grid');
+        const cq = document.getElementById('current-question'), pb = document.getElementById('progress-bar');
+        const mo = document.getElementById('modal-overlay'), cm = document.getElementById('close-modal');
+        const mp = document.getElementById('modal-poster'), mt = document.getElementById('modal-title');
+        const mgd = document.getElementById('modal-genre'), my = document.getElementById('modal-year');
+        const mr = document.getElementById('modal-rating'), md = document.getElementById('modal-description');
+
+        function initQuiz() {
+            currentQuestion = 0; selectedOptions = []; selectedGenre = "";
+            rc.style.display = 'none'; renderQuestion(); updateProgressBar();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            qt.textContent = q.question; cq.textContent = currentQuestion + 1;
+            oc.innerHTML = '';
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => selectOption(opt, btn);
+                oc.appendChild(btn);
+            });
+            nb.disabled = true;
+        }
+
+        function selectOption(opt, btn) {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            if (currentQuestion === 0) selectedGenre = opt;
+            selectedOptions[currentQuestion] = opt;
+            nb.disabled = false;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++; renderQuestion(); updateProgressBar();
+            } else showResults();
+        }
+
+        function updateProgressBar() {
+            pb.style.width = `${(currentQuestion / questions.length) * 100}%`;
+        }
+
+        function showResults() {
+            rc.style.display = 'block'; mg.innerHTML = '';
+            
+            // Determine minimum rating based on subscription plan
+            let minRating = 7.0;
+            if (userPlan === "Basic") {
+                minRating = 7.0;
+            } else if (userPlan === "Standard") {
+                minRating = 7.5;
+            } 
+            // Premium gets all movies (including premium exclusives)
+
+            // Filter by genre first
+            let filtered = [];
+            if (selectedGenre === "Action") filtered = movies.filter(m => m.genre === "Action");
+            else if (selectedGenre === "Drama") filtered = movies.filter(m => m.genre === "Drama");
+            else if (selectedGenre === "Sci-Fi") filtered = movies.filter(m => m.genre === "Sci-Fi");
+            else if (selectedGenre === "Fantasy") filtered = movies.filter(m => m.genre === "Fantasy");
+            else if (selectedGenre === "Animation") filtered = movies.filter(m => m.genre === "Animation");
+            else if (selectedGenre === "Thriller") filtered = movies.filter(m => m.genre === "Thriller");
+            else if (selectedGenre === "Comedy") filtered = movies.filter(m => m.genre === "Comedy");
+            else filtered = [...movies];
+            
+            // Apply rating filter based on plan
+            filtered = filtered.filter(m => parseFloat(m.rating) >= minRating);
+            
+            // For Basic and Standard, exclude premium-only content
+            if (userPlan !== "Premium") {
+                filtered = filtered.filter(m => !m.isPremium);
+            }
+            
+            const ratingPref = selectedOptions[2] || "Any Rating";
+            if (ratingPref === "High (8.0+)") {
+                filtered = filtered.filter(m => parseFloat(m.rating) >= 8.0);
+            } else if (ratingPref === "Medium (7.0-7.9)") {
+                filtered = filtered.filter(m => {
+                    const r = parseFloat(m.rating); return r >= 7.0 && r <= 7.9;
+                });
+            }
+            
+            filtered.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+            const display = filtered.slice(0, 6);
+            
+            if (display.length === 0) {
+                mg.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: #b3b3b3;">No movies found for your preferences. Try different options!</p>';
+                return;
+            }
+            
+            display.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.addEventListener('click', () => showModal(movie));
+                
+                let badgeHTML = '';
+                if (movie.isPremium && userPlan === "Premium") {
+                    badgeHTML = '<div class="premium-badge">PREMIUM</div>';
+                }
+                
+                card.innerHTML = `
+                    <div class="movie-poster" style="background-image: url('${movie.poster}')">
+                        ${badgeHTML}
+                        <div class="play-icon"></div>
+                    </div>
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-genre">${movie.genre}</div>
+                        <div class="movie-rating">⭐ ${movie.rating}</div>
+                        <div class="movie-year">${movie.year}</div>
+                    </div>
+                `;
+                mg.appendChild(card);
+            });
+            pb.style.width = '100%';
+        }
+
+        function showModal(movie) {
+            mp.style.backgroundImage = `url('${movie.poster}')`;
+            mt.textContent = movie.title;
+            mgd.textContent = `Genre: ${movie.genre}`;
+            my.textContent = `Year: ${movie.year}`;
+            mr.textContent = `Rating: ⭐ ${movie.rating}`;
+            md.textContent = movie.description;
+            mo.classList.add('active');
+        }
+
+        function closeModal() {
+            mo.classList.remove('active');
+        }
+
+        nb.addEventListener('click', nextQuestion);
+        rb.addEventListener('click', initQuiz);
+        cm.addEventListener('click', closeModal);
+        mo.addEventListener('click', e => { if (e.target === mo) closeModal(); });
+
+        initQuiz();
+    </script>
+</body>
+</html>
