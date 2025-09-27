@@ -1,0 +1,39 @@
+// Online C++ compiler to run C++
+   program online
+#include <iostream>
+#include < string›
+using namespace std;
+
+int main() {
+string plan;
+int months;
+double costPerMonth, total;
+
+cout <<"Enter subcription plan
+(Basic / Standard / Premium):"
+;
+cin >> plan;
+cout < "Enter number of months: "
+;
+cin >> months;
+
+if (plan == "Basic" || plan ==
+"basic") {
+costPerMonth = 25;
+} else if (plan == "Standard" ||
+plan == "standard") {
+costPerMonth = 40;
+} else if (plan == "Premium" ||
+plan == "premium") {
+costPerMonth = 55;
+} else 1
+cout < "Invalid plan selected
+." < endl;
+return 0; /1 exit program
+total = costPerMonth * months;
+//calculation part
+total = costPerMonth * months; //calculation part
+cout << "Plan: " < plan << endl; cout << "Months: " << months << endl;
+cout << "Total Subcription Cost = RM " < total < endl;
+return 0;
+}
